@@ -14,8 +14,8 @@ class Movie(models.Model):
 
 
 class Review(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    movie = models.ForeignKey(Movie, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="reviewer")
+    movie = models.ForeignKey(Movie, on_delete=models.CASCADE, related_name="reviews")
     rate = models.PositiveIntegerField(default=1, validators=[MinValueValidator(1), MaxValueValidator(10)])
     review = models.TextField(default=None, null=True)
 
@@ -24,8 +24,8 @@ class Review(models.Model):
 
 
 class MoviesSeen(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    movie = models.ForeignKey(Movie, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="seen")
+    movie = models.ForeignKey(Movie, on_delete=models.CASCADE, related_name="watchers")
 
     class Meta:
         db_table = 'movies_seen'
@@ -39,8 +39,8 @@ class StreamingPlatforms(models.Model):
 
 
 class MoviePlatforms(models.Model):
-    movie = models.ForeignKey(Movie, null=True, on_delete=models.SET_NULL)
-    platform = models.ForeignKey(StreamingPlatforms, on_delete=models.CASCADE)
+    movie = models.ForeignKey(Movie, null=True, on_delete=models.SET_NULL, related_name="availability")
+    platform = models.ForeignKey(StreamingPlatforms, on_delete=models.CASCADE, related_name="catalogue")
 
     class Meta:
         db_table = 'movie_platforms'

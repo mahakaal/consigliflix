@@ -1,16 +1,28 @@
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
-from rest_framework import serializers
+from rest_framework import serializers, status
+from rest_framework.response import Response
 from rest_framework.validators import UniqueValidator
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-from consigliflix.models import Movie
+from consigliflix.models import Movie, Review
 
 
-class MovieSerializer(serializers.HyperlinkedModelSerializer):
+class MovieSerializer(serializers.ModelSerializer):
     class Meta:
         model = Movie
-        fields = ('id', 'title', 'genre', 'year', 'platform')
+        fields = ('id', 'title', 'genre', 'year')
+
+
+class AuthenticatedMovieSerializer(serializers.ModelSerializer):
+    seen = serializers.SerializerMethodField('has_seen')
+
+    def has_seen(self, movie):
+        return True if movie.watchers.count() else False
+
+    class Meta:
+        model = Movie
+        fields = ('id', 'title', 'genre', 'year', 'seen')
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -58,4 +70,13 @@ class TokenSerializer(TokenObtainPairSerializer):
         # Add custom claims
         token['username'] = user.username
         return token
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(read_only=True, source="user.username")
+    movie = serializers.CharField(read_only=True, source="movie.title")
+
+    class Meta:
+        model = Review
+        fields = ('username', 'movie', 'rate', 'review')
 
